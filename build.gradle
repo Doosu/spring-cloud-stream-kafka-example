@@ -1,0 +1,89 @@
+buildscript {
+	ext {
+		springBootVersion = '2.4.3'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath "io.spring.gradle:dependency-management-plugin:1.0.11.RELEASE"
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+allprojects {
+	group 'com.example'
+	version '1.0.0-SNAPSHOT'
+}
+
+subprojects {
+	apply plugin: 'java'
+	apply plugin: 'org.springframework.boot'
+	apply plugin: 'io.spring.dependency-management'
+
+	sourceCompatibility = JavaVersion.VERSION_11
+	targetCompatibility = JavaVersion.VERSION_11
+
+	ext {
+		springCloudVersion = '2020.0.1'
+	}
+
+	repositories {
+		mavenCentral()
+		maven { url 'https://repo.spring.io/libs-release-local' }
+	}
+
+	dependencies {
+		compileOnly 'org.projectlombok:lombok'
+		annotationProcessor 'org.projectlombok:lombok'
+
+		implementation 'org.apache.kafka:kafka-streams'
+		implementation 'org.springframework.cloud:spring-cloud-stream'
+		implementation 'org.springframework.cloud:spring-cloud-stream-binder-kafka-streams'
+
+		testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	}
+
+	dependencyManagement {
+		imports {
+			mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+		}
+	}
+
+	task initSourceFolders {
+		sourceSets*.java.srcDirs*.each {
+			if (!it.exists()) {
+				it.mkdirs()
+			}
+		}
+		sourceSets*.resources.srcDirs*.each {
+			if (!it.exists()) {
+				it.mkdirs()
+			}
+		}
+	}
+}
+
+project(':model') {
+	dependencies {
+	}
+}
+
+project(':consumer') {
+	dependencies {
+		compile project(':model')
+	}
+}
+
+project(':producer') {
+	dependencies {
+		compile project(':model')
+		implementation 'org.springframework.cloud:spring-cloud-stream-binder-kafka'
+	}
+}
+
+project(':processor') {
+	dependencies {
+		compile project(':model')
+	}
+}

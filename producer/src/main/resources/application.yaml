@@ -1,0 +1,24 @@
+spring.cloud.stream:
+  function:
+    definition: numberProducer
+  bindings:
+    numberProducer-out-0:
+      destination: numbers
+      producer:
+        use-native-encoding: true
+  kafka:
+    default-binder: kafka
+    bindings:
+      numberProducer-out-0:
+        producer:
+          configuration:
+            value:
+              serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    binder:
+      brokers:
+        - localhost:9091
+        - localhost:9092
+
+spring.kafka.properties:
+  spring.json.trusted.packages: com.example.models
+  default.deserialization.exception.handler:
